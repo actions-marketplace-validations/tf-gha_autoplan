@@ -1,0 +1,31 @@
+name: 'Autoplan Terraform'
+description: 'Autoplan on commit'
+
+inputs:
+  dir:
+    required: true
+    type: string
+  terraform_version:
+    required: false
+    type: string
+  tfc_token:
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+        cli_config_credentials_token: ${{ inputs.tfc_token }}
+    - uses: actions/github-script@v5
+      with:
+        script: |
+          await require('${{ github.action_path }}/index.js')({
+            github,
+            context,
+            glob,
+            exec,
+            dir: '${{ inputs.dir }}'
+          })
